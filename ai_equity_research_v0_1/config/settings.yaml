@@ -1,0 +1,62 @@
+universe:
+  # Starter cross-market sample, NOT a complete or point-in-time global universe.
+  # Yahoo Finance suffixes are used for non-US listings; verify symbols before use.
+  tickers: [AAPL, MSFT, NVDA, JPM, ASML, SAP, NESN.SW, NOVO-B.CO, SHEL, AZN, TSM, BABA, 7203.T, 005930.KS, RELIANCE.NS, HDFCBANK.NS, SHOP, BHP, CBA.AX, SPY]
+data:
+  start_date: "2015-01-01"
+  benchmark: "SPY"
+model:
+  version: "v0.1-price-only"
+  horizon_days: 126
+  rebalance: "monthly"
+  top_n: 10
+  min_history_days: 252
+backtest:
+  transaction_cost_bps: 5.0
+
+validation:
+  # Keep this final evaluation window fixed before inspecting results.
+  evaluation_start: "2024-01-01"
+  evaluation_end: null
+  periods:
+    2019_2020: ["2019-01-01", "2020-12-31"]
+    2021_2022: ["2021-01-01", "2022-12-31"]
+    2023: ["2023-01-01", "2023-12-31"]
+    out_of_sample: ["2024-01-01", null]
+
+fundamentals:
+  enabled: true
+  # Global starter sample. Yahoo Finance symbols may change; failed symbols are skipped.
+  tickers: [AAPL, MSFT, NVDA, JPM, ASML, SAP, NESN.SW, NOVO-B.CO, SHEL, AZN, TSM, BABA, 7203.T, 005930.KS, RELIANCE.NS, HDFCBANK.NS, SHOP, BHP, CBA.AX]
+  scoring_weights:
+    value: 0.40
+    quality: 0.35
+    growth: 0.25
+
+machine_learning:
+  enabled: true
+  # Price-only experimental model. Labels are 126-trading-day forward returns.
+  horizon_days: 126
+  min_train_rows: 250
+  random_state: 42
+
+# Daily feed and scheduler. Default yfinance is broad and free for personal
+# research but unofficial/best-effort; do not use as a licensed production feed.
+daily_update:
+  provider: "yfinance" # or alpha_vantage for a small universe; set ALPHA_VANTAGE_API_KEY
+  cache_path: "data/raw/adjusted_close.parquet"
+  max_stale_calendar_days: 5
+  min_coverage_fraction: 0.80
+  execution_costs:
+    half_spread_bps: 5.0
+    slippage_bps: 5.0
+    commission_bps: 1.0
+
+paper_trading:
+  top_n: 10
+  min_history_days: 252
+  initial_cash: 100000.0
+  max_position_weight: 0.20
+  max_gross_exposure: 1.0
+  # Leave null to process all eligible dates in the cached historical panel.
+  start_date: null
